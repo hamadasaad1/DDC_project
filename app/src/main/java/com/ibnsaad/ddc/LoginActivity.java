@@ -8,8 +8,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,6 +37,8 @@ public class LoginActivity extends AppCompatActivity {
     Button mLoginButton;
     @BindView(R.id.link_signup)
     TextView mSignupLink;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +62,8 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
                 overridePendingTransition(R.anim.push_left,
                         R.anim.push_left_out);
+
+
             }
         });
 
@@ -74,7 +88,9 @@ public class LoginActivity extends AppCompatActivity {
         String email = mEmailText.getText().toString();
         String password = mPasswordText.getText().toString();
 
+
         // TODO: Implement your own authentication logic here.
+        loginWithNetworkFaster(email,password);
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -126,4 +142,41 @@ public class LoginActivity extends AppCompatActivity {
 
         return valid;
     }
+
+    private void loginWithNetworkFaster(String email, String password) {
+
+        AndroidNetworking.post("http://disability.eb2a.com/disability/api/getdata.php?type=signin")
+                .addBodyParameter(email)
+                .addBodyParameter(password)
+                .setTag("test")
+                .setPriority(Priority.MEDIUM)
+                .build()
+                .getAsJSONObject(new JSONObjectRequestListener() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+                            Toast.makeText(LoginActivity.this,
+                                    "response +"+response.getString("token")
+                                    , Toast.LENGTH_SHORT).show();
+
+                            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                            startActivity(intent);
+                        } catch (JSONException e) {
+                            Toast.makeText(LoginActivity.this,
+                                    "JSONException "+e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Toast.makeText(LoginActivity.this, "Can't Login Now..."
+                                        +anError.getErrorBody(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 }
