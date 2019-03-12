@@ -236,7 +236,7 @@ public class RegisterActivity extends AppCompatActivity {
             mEmailText.setError(null);
         }
 
-        if (mobile.isEmpty() || mobile.length()!=10) {
+        if (mobile.isEmpty() || mobile.length()!=11) {
             mMobileText.setError("Enter Valid Mobile Number");
             valid = false;
         } else {
